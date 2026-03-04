@@ -1,15 +1,10 @@
-# cli_tool.py
-
 import argparse
-from models import Task, User
+from .models import Task, User
 
-# In-memory storage
 users = {}
 
 def add_task(args):
-    # Get existing user or create new one
     user = users.get(args.user)
-
     if not user:
         user = User(args.user)
         users[args.user] = user
@@ -21,33 +16,28 @@ def add_task(args):
 def complete_task(args):
     user = users.get(args.user)
 
-    if not user:
-        print("User not found.")
-        return
-
-    for task in user.tasks:
-        if task.title == args.title:
-            task.complete()
-            return
-
-    print("Task not found.")
+    if user:
+        for task in user.tasks:
+            if task.title == args.title:
+                task.complete()
+                return
+        print("❌ Task not found.")
+    else:
+        print("❌ User not found.")
 
 
 def main():
     parser = argparse.ArgumentParser(description="Task Manager CLI")
-
     subparsers = parser.add_subparsers(dest="command")
 
-    # Add task command
     add_parser = subparsers.add_parser("add-task", help="Add a new task")
-    add_parser.add_argument("user", type=str, help="User name")
-    add_parser.add_argument("title", type=str, help="Task title")
+    add_parser.add_argument("user")
+    add_parser.add_argument("title")
     add_parser.set_defaults(func=add_task)
 
-    # Complete task command
     complete_parser = subparsers.add_parser("complete-task", help="Complete a task")
-    complete_parser.add_argument("user", type=str, help="User name")
-    complete_parser.add_argument("title", type=str, help="Task title")
+    complete_parser.add_argument("user")
+    complete_parser.add_argument("title")
     complete_parser.set_defaults(func=complete_task)
 
     args = parser.parse_args()
